@@ -1,0 +1,46 @@
+{
+  "generator-jhipster": {
+    "applicationType": "monolith",
+    "gitCompany": "",
+    "baseName": "inovio",
+    "packageName": "axm.inovio",
+    "packageFolder": "axm/inovio",
+    "serverPort": 8089,
+    "serviceDiscoveryType": false,
+    "authenticationType": "jwt",
+    "uaaBaseName": "../uaa",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "mysql",
+    "searchEngine": "elasticsearch",
+    "enableSwaggerCodegen": "true",
+    "messageBroker": false,
+    "buildTool": "maven",
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "testFrameworks": [
+      "protractor"
+    ],
+    "enableTranslation": true,
+    "nativeLanguage": "en",
+    "languages": [
+      "de",
+      "en"
+    ],
+    "clientFramework": "angularX",
+    "jhiPrefix": "jhi",
+    "jhipsterVersion": "6.2.0",
+    "jwtSecretKey": "YmZhNTdkMTgyMTM3MmI0OTFjZmRmMTMxYzdjN2IyMzRlZjQ0MWM1NjFlMGJhM2MzOTc5NTdhNGMxMjM5NGU2MTc4NTEwNTBhZTA4MDVmYmUyNWIyYjVkMTg0YzlkMjczNjRlYWMxMzFkY2E1Yzc2MTFhMGI1OGU4ODAwZTdjYWM=",
+    "clientTheme": "none",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "blueprints": []
+  },
+  "git-provider": "GitHub",
+  "git-company": "axmsoftware-npi",
+  "repository-name": "inovio"
+}
