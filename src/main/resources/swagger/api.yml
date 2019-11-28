@@ -1,5 +1,7 @@
 # API-first development with OpenAPI
 # This file will be used at compile time to generate Spring-MVC endpoint stubs using openapi-generator
+# Copywright 2019, AXM Software LLC
+
 openapi: '3.0.1'
 info:
   title: 'inovio'
@@ -9,8 +11,34 @@ servers:
     description: Development server
   - url: https://localhost:8089
     description: Development server with TLS Profile
-paths: {}
-
+security:
+  - jwt: []
+paths:
+  /client:
+    post:
+      tags:
+        - pet
+      summary: Add a new client to the markletplace
+      operationId: addClient
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - petstore_auth:
+            - 'write:clients'
+            - 'read:clients'
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
 components:
   securitySchemes:
     jwt:
@@ -18,5 +46,188 @@ components:
       description: JWT Authentication
       scheme: bearer
       bearerFormat: JWT
-security:
-  - jwt: []
+  schemas:
+    ApiResponse:
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+          format: 'int32'
+        type:
+          type: 'string'
+        message:
+          type: 'string'
+    Quote:
+      type: 'object'
+      required:
+        - desiredLeadTime
+        - availableBudget
+        - STEPfiles
+        - PDFfiles
+        - isRequest
+        - parts3DModels
+        - partsDrawings
+        - requestedBy
+        - partsQuantity
+      properties:
+        defaultQuoteTemplate:
+          $ref: '#/components/schemas/FileOrLink'
+        desiredLeadTime:
+          type: 'string'
+        availableBudget:
+          type: 'string'
+          format: EURO###.##
+          minimum: 100
+        requestedBy:
+          type: 'string'
+          description: 'ClientId of the client requesting the quote'
+        acceptedBy:
+          type: 'string'
+          description: 'SupplierId of the supplier accepting the quote'
+        isRequest:
+          type: boolean
+          default: true
+        isAssembly:
+          type: boolean
+          default: true
+        assembly3DModels:
+          type: array
+          example: 'Accepted STEP, IGS, STL'
+          items:
+            $ref: '#/components/schemas/FileOrLink'
+        assemblyDrawings:
+          type: array
+          example: 'Accepted PDF'
+          items:
+            $ref: '#/components/schemas/FileOrLink'
+        assemblyQuantity:
+          type: integer
+        parts3DModels:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileOrLink'
+        partsDrawings:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileOrLink'
+        partsQuantity:
+          type: integer
+          minimum: 1
+        notifyByEmail:
+          type: boolean
+          default: false
+          description: 'Available option for registered clients only to recieve an email instead with quotes'
+        notifiedSuppliers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Supplier'
+        reserveTimeLimit:
+          type: integer
+          maximum: 24
+          description: 'Time limit for client to reserver a summary quote from a supplier'
+        estimatedTotalCost:
+          type: number
+          format: float
+        estimatedLeadTime:
+          type: 'string'
+    Supplier:
+      type: 'object'
+      required:
+        - supplierId
+        - supplierAlias
+        - countryLocale
+        - supplierRating
+        - quote
+      properties:
+        supplierId:
+          type: 'string'
+        supplierAlias:
+          type: 'string'
+          description: 'Mask alias i.e. Supplier 1, not actual name'
+        countryLocale:
+          type: 'string'
+          description: 'Supplier contry locale'
+        supplierRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        quote:
+          $ref: '#/components/schemas/Quote'
+        supplierTerms:
+          $ref: '#/components/schemas/FileOrLink'
+        supplierQuoteTemplate:
+          $ref: '#/components/schemas/FileOrLink'
+    FileOrLink:
+      type: 'object'
+      required:
+        - storedFilePath
+        - sourceFilePath
+      properties:
+        storedFilePath:
+          type: 'string'
+          format: url
+        sourceFilePath:
+          type: 'string'
+          format: url
+        isDirectory:
+          type: boolean
+          default: false
+        isCompressed:
+          type: boolean
+          default: false
+        isEncrypted:
+          type: boolean
+          default: false
+        isDeleted:
+          type: boolean
+          default: false
+        dateDeleted:
+          type: 'string'
+          format: date
+    Client:
+      type: 'object'
+      required:
+        - clientId
+        - fullName
+        - companyName
+        - businessEmail
+        - department
+        - acceptTerms
+      properties:
+        clientId:
+          type: 'string'
+          description: 'auto generated client id'
+        fullName:
+          type: 'string'
+        companyName:
+          type: 'string'
+        businessEmail:
+          type: 'string'
+          format: email
+        businessPhone:
+          type: 'string'
+          format: phone
+        department:
+          type: 'string'
+        acceptTerms:
+          type: boolean
+          default: false
+        termsURL:
+          type: 'string'
+          format: url
+          default: https://inovio.co/gdpr-default-terms
+        password:
+          type: 'string'
+          format: password
+          default: 'auto-generated-first-time'
+  requestBodies:
+    Client:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Client'
+      description: Client object that needs to be added to the store
+      required: true
