@@ -26,13 +26,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: '#/components/schemas/ModelApiResponse'
         '405':
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: '#/components/schemas/ModelApiResponse'
       security:
         - petstore_auth:
             - 'write:clients'
@@ -47,7 +47,7 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    ApiResponse:
+    ModelApiResponse:
       type: 'object'
       properties:
         code:
