@@ -17,8 +17,9 @@ paths:
   /client:
     post:
       tags:
-        - pet
-      summary: Add a new client to the markletplace
+        - client
+        - marketplace
+      summary: Add a new client to the markletplace (synchronous)
       operationId: addClient
       responses:
         '200':
@@ -26,19 +27,192 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ModelApiResponse'
+                $ref: '#/components/schemas/Client'
         '405':
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ModelApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
       security:
-        - petstore_auth:
+        - marketplace_auth:
             - 'write:clients'
             - 'read:clients'
       requestBody:
         $ref: '#/components/requestBodies/Client'
+  '/client/{Id}':
+    get:
+      tags:
+        - client
+        - marketplace
+      summary: Find client by ID
+      description: Returns a single client (synchronous)
+      operationId: getClientById
+      parameters:
+        - name: Id
+          in: path
+          description: ID of client to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  '/supplier/{Id}':
+    get:
+      tags:
+        - supplier
+        - marketplace
+      summary: Find supplier by ID
+      description: Returns a single supplier (synchronous)
+      operationId: getSupplierById
+      parameters:
+        - name: Id
+          in: path
+          description: ID of supplier to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+        '400':
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Supplier not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  '/quote/{Id}':
+    get:
+      tags:
+        - quote
+        - marketplace
+      summary: Find quote by ID
+      description: Returns a single quote (synchronous)
+      parameters:
+        - name: Id
+          in: path
+          description: ID of quote to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: false
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - rfqprocessed
+                - rfqdetails
+                - quoted
+                - ordered
+                - notready
+              default: rfqprocessed
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Quote not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /quote/summary:
+    get:
+      tags:
+        - marketplace
+        - quote
+      summary: Finds Quotes by status (asynchronous)
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findQuotesByStatus
+      parameters:
+        - name: status
+          in: query
+          description: Status values that need to be considered for filter
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - rfqprocessed
+                - rfqdetails
+                - quoted
+                - ordered
+              default: rfqprocessed
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+        '400':
+          description: Invalid status value
+      security:
+        - marketplace_auth:
+            - 'write:quotes'
+            - 'read:quotes'
 components:
   securitySchemes:
     jwt:
@@ -47,7 +221,7 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    ModelApiResponse:
+    ApiResponse:
       type: 'object'
       properties:
         code:
@@ -60,6 +234,8 @@ components:
     Quote:
       type: 'object'
       required:
+        - status
+        - quoteId
         - desiredLeadTime
         - availableBudget
         - STEPfiles
@@ -70,6 +246,12 @@ components:
         - requestedBy
         - partsQuantity
       properties:
+        status:
+          type: 'string'
+          default: 'notready'
+        quoteId:
+          type: 'string'
+          description: System generated Id
         defaultQuoteTemplate:
           $ref: '#/components/schemas/FileOrLink'
         desiredLeadTime:
@@ -141,6 +323,7 @@ components:
       properties:
         supplierId:
           type: 'string'
+          description: System generated Id
         supplierAlias:
           type: 'string'
           description: 'Mask alias i.e. Supplier 1, not actual name'
@@ -196,7 +379,7 @@ components:
       properties:
         clientId:
           type: 'string'
-          description: 'auto generated client id'
+          description: System generated Id
         fullName:
           type: 'string'
         companyName:
